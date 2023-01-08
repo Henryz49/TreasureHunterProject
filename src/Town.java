@@ -12,6 +12,10 @@ public class Town
     private String printMessage;
     private boolean toughTown;
 
+    private Treasure treasure;
+
+    private int winCondition;
+
     //Constructor
     public Town(Shop shop, double toughness)
     {
@@ -26,8 +30,13 @@ public class Town
 
         // higher toughness = more likely to be a tough town
         toughTown = (Math.random() < toughness);
-    }
 
+        treasure = new Treasure();
+        winCondition = 0;
+    }
+    public int getWinCondition(){
+        return winCondition;
+    }
     public String getLatestNews()
     {
         return printMessage;
@@ -111,9 +120,13 @@ public class Town
             }
             else
             {
+                if (hunter.getGold() - goldDiff < 0){
+                    printMessage += "What? You don't have enough gold? Guess your time is up!";
+                    winCondition = 2;
+                }else{
                 printMessage += "That'll teach you to go lookin' fer trouble in MY town! Now pay up!";
                 printMessage += "\nYou lost the brawl and pay " +  goldDiff + " gold.";
-                hunter.changeGold(-1 * goldDiff);
+                hunter.changeGold(-1 * goldDiff);}
             }
         }
     }
@@ -165,5 +178,23 @@ public class Town
     {
         double rand = Math.random();
         return (rand < 0.5);
+    }
+    public void huntForTreasure(){
+        String treasureStr = treasure.getType();
+        printMessage = "You search the town for treasure and found " + treasureStr;
+
+        if (treasureStr.equals("nothing")){
+            printMessage += ("/nYou found absolutely nothing, unlucky...");
+        } else {
+            if (hunter.collectTreasure(treasure)){
+                printMessage += ("\nThats a new one, lets add that to your collection!");
+                if (Treasure.allTreasures(hunter.getTreasureCollection())){
+                    winCondition = 1;
+                }
+            }
+            else{
+                printMessage += ("\nYou already have that, no need for another");
+            }
+        }
     }
 }
